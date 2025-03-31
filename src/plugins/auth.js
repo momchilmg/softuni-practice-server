@@ -7,6 +7,7 @@ function initPlugin(settings) {
     return function decorateContext(context, request) {
         context.auth = {
             register,
+            update,
             login,
             logout
         };
@@ -49,6 +50,24 @@ function initPlugin(settings) {
                 result.accessToken = session.accessToken;
 
                 return result;
+            }
+        }
+        
+        function update(body) {
+            if (body.hasOwnProperty('_id') || body.hasOwnProperty('_createdOn') ||
+                body.hasOwnProperty('_updatedOn') || body.hasOwnProperty('password') ||
+                body.hasOwnProperty('hashedPassword')) {
+                throw new RequestError$2('System fields');
+            } else if (context.user !== undefined) {
+                const session = findSessionByUserId(context.user._id);
+                if (session === undefined) {
+                    throw new RequestError$2('Missing fields');
+                } else {
+                    const result = context.protectedStorage.merge('users', context.user._id, body);                        
+                    return result;
+                }
+            } else {
+                throw new CredentialError$1('User session does not exist');
             }
         }
 

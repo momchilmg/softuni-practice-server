@@ -9,6 +9,7 @@ const Service = require('./Service');
 const userService = new Service();
 
 userService.get('me', getSelf);
+userService.patch('me', onUpdate);
 userService.post('register', onRegister);
 userService.post('login', onLogin);
 userService.get('logout', onLogout);
@@ -22,6 +23,10 @@ function getSelf(context, tokens, query, body) {
     } else {
         throw new AuthorizationError();
     }
+}
+
+function onUpdate(context, tokens, query, body) {
+    return context.auth.update(body);
 }
 
 function onRegister(context, tokens, query, body) {
